@@ -1,0 +1,62 @@
+---
+title: "Working iwth Dates and Times in R"
+author: "KVP"
+date: "9/26/2021"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(dplyr)
+library(lubridate)
+library(reactable)
+```
+
+# Create Database
+In this database we will have one column that has the date/times stored as a character and the other column storing the date/times as a numeric column. 
+
+The numeric column is the seconds from 1970-01-01 00:00.00 UTC. When you are given a numeric date/time column be sure to check which software it was created with. I will be doing a follow-up post about working with excel numeric date/times.
+
+```{r create_db, include = FALSE}
+df <- data.frame(date_char = c("2021-09-15 09:15", "2020-10-05 20:20", "2021-11-03 13:00"),
+                 date_numeric = as.numeric(as.POSIXlt(c("2021-09-15 09:15", "2020-10-05 20:20", 
+                                                        "2021-11-03 13:00"))))
+```
+
+# Check the Type of Each Column
+Now that we have our date/time columns created in our dataframe, we can check the type of each column by using the `class()` function. The `df$date_char` will be type `character` while `df$date_numeric` will be a `numeric` dataframe column.
+
+```{r check_type}
+# Prints a character type
+class(df$date_char)
+
+# Prints a numeric type
+class(df$date_numeric)
+```
+
+# Parse Each Column
+## Parse the Character Column
+```{r parse_char}
+df$date_char_parsed <- parse_date_time(df$date_char, "%Y-%m-%d %H:%M", tz = "America/New_York")
+print(df$date_char_parsed)
+```
+
+## Parse the Numeric Column
+```{r, parse_num}
+df$date_numeric_parsed <- as.POSIXct(df$date_numeric, origin = "1970-01-01 00:00.00 UTC",
+                                     tz = "America/New_York")
+print(df$date_numeric_parsed)
+```
+
+# Summary
+We now have our character and numeric date columns in the same format. We can now do calculations using `{lubridate}` or format the date for graphs or tables.
+
+As a bonus, below is a table of all the different timezone names for your reference.
+
+# Table of All the Timezone Names
+```{r, timezone_names}
+tzNames <- data.frame(names = OlsonNames())
+tzNames %>%
+  reactable(searchable = TRUE)
+```
+
